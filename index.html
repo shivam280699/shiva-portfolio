@@ -351,6 +351,38 @@
             font-size: 14px;
         }
 
+        /* Mouse Spotlight Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(
+                600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+                rgba(100, 255, 218, 0.08),
+                transparent 40%
+            );
+            z-index: 10;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        body.mouse-active::before {
+            opacity: 1;
+        }
+
+        /* Active Navigation Styling */
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .nav-links a.active::before {
+            width: 100%;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .container {
@@ -378,6 +410,11 @@
             .section-title::after {
                 width: 200px;
             }
+
+            /* Disable spotlight on mobile for performance */
+            body::before {
+                display: none;
+            }
         }
 
         /* Animations */
@@ -399,6 +436,8 @@
         /* Counter reset */
         body {
             counter-reset: section;
+            --mouse-x: 50vw;
+            --mouse-y: 50vh;
         }
     </style>
 </head>
@@ -464,7 +503,7 @@
                         </ul>
                     </div>
                     <div class="about-image">
-                        <img src="images/shiva.jpg" alt="Shiva Prasad Nayak">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjMTEyMjQwIi8+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjEyMCIgcj0iNDAiIGZpbGw9IiM2NGZmZGEiIG9wYWNpdHk9IjAuNyIvPgo8cmVjdCB4PSIxMDAiIHk9IjE4MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSI2MCIgcng9IjMwIiBmaWxsPSIjY2NkNmY2IiBvcGFjaXR5PSIwLjgiLz4KPHN2Zz4K" alt="Shiva Prasad Nayak">
                     </div>
                 </div>
             </div>
@@ -536,6 +575,53 @@
     </footer>
 
     <script>
+        // Mouse spotlight effect
+        let mouseX = 0;
+        let mouseY = 0;
+        let isMouseActive = false;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            document.documentElement.style.setProperty('--mouse-x', mouseX + 'px');
+            document.documentElement.style.setProperty('--mouse-y', mouseY + 'px');
+            
+            if (!isMouseActive) {
+                document.body.classList.add('mouse-active');
+                isMouseActive = true;
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            document.body.classList.remove('mouse-active');
+            isMouseActive = false;
+        });
+
+        // Active navigation highlighting
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-links a');
+
+        function updateActiveNav() {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                
+                if (window.scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -550,7 +636,7 @@
             });
         });
 
-        // Header background on scroll
+        // Header background on scroll and active nav update
         window.addEventListener('scroll', () => {
             const header = document.querySelector('header');
             if (window.scrollY > 100) {
@@ -558,7 +644,13 @@
             } else {
                 header.style.background = 'rgba(10, 14, 39, 0.85)';
             }
+            
+            // Update active navigation
+            updateActiveNav();
         });
+
+        // Initial active nav setup
+        window.addEventListener('load', updateActiveNav);
 
         // Add animation on scroll
         const observerOptions = {
