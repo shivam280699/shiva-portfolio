@@ -27,6 +27,12 @@
             color: var(--text-secondary);
             background: var(--bg-primary);
             overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Prevent scroll restoration */
+        html {
+            scroll-behavior: smooth;
         }
 
         .container {
@@ -101,7 +107,7 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            padding-top: 80px;
+            padding-top: 100px;
         }
 
         .hero-content {
@@ -663,8 +669,29 @@
             updateActiveNav();
         });
 
-        // Initial active nav setup
-        window.addEventListener('load', updateActiveNav);
+        // Force scroll to top on page load/reload
+        window.addEventListener('beforeunload', () => {
+            window.scrollTo(0, 0);
+        });
+
+        window.addEventListener('load', () => {
+            // Force scroll to top
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+            }, 0);
+            
+            // Initial active nav setup
+            updateActiveNav();
+        });
+
+        // Also ensure scroll to top on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        });
 
         // Add animation on scroll
         const observerOptions = {
