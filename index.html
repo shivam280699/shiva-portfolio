@@ -361,12 +361,13 @@
             height: 100%;
             pointer-events: none;
             background: radial-gradient(
-                600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-                rgba(100, 255, 218, 0.08),
-                transparent 40%
+                600px circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh),
+                rgba(100, 255, 218, 0.15),
+                rgba(100, 255, 218, 0.05) 30%,
+                transparent 60%
             );
             z-index: 10;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
             opacity: 0;
         }
 
@@ -580,22 +581,35 @@
         let mouseY = 0;
         let isMouseActive = false;
 
-        document.addEventListener('mousemove', (e) => {
+        function updateMousePosition(e) {
             mouseX = e.clientX;
             mouseY = e.clientY;
             
-            document.documentElement.style.setProperty('--mouse-x', mouseX + 'px');
-            document.documentElement.style.setProperty('--mouse-y', mouseY + 'px');
+            // Update CSS custom properties on document root
+            document.body.style.setProperty('--mouse-x', mouseX + 'px');
+            document.body.style.setProperty('--mouse-y', mouseY + 'px');
             
             if (!isMouseActive) {
                 document.body.classList.add('mouse-active');
                 isMouseActive = true;
             }
-        });
+        }
 
+        // Add mouse move listener to the entire document
+        document.addEventListener('mousemove', updateMousePosition);
+
+        // Handle mouse leave
         document.addEventListener('mouseleave', () => {
             document.body.classList.remove('mouse-active');
             isMouseActive = false;
+        });
+
+        // Also handle when mouse enters the window
+        document.addEventListener('mouseenter', () => {
+            if (!isMouseActive) {
+                document.body.classList.add('mouse-active');
+                isMouseActive = true;
+            }
         });
 
         // Active navigation highlighting
